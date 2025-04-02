@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -37,10 +39,9 @@ jobs:
         run: npm run build
 
       - name: Deploy to public branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Building project..."
-          npm run build
-          
           cd dist
           touch .nojekyll
           
@@ -50,4 +51,7 @@ jobs:
           git init
           git add -A
           git commit -m "Deploy to GitHub Pages"
-          git push -f main HEAD:gh-pages
+          
+          # Push to gh-pages branch using GITHUB_TOKEN
+          remote_repo="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push -f "${remote_repo}" HEAD:gh-pages
