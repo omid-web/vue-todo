@@ -36,29 +36,33 @@ jobs:
       - name: Build the project
         run: npm run build
 
-      - name: Debug directory structure
-        run: |
-          pwd
-          ls -la
-          
       - name: Deploy to public branch
         run: |
-          if [ -d "dist" ]; then
-            echo "Found dist directory"
-            git config --global user.name "GitHub Action"
-            git config --global user.email "action@github.com"
-            git checkout --orphan gh-pages
-            git rm -rf .
-            mv dist/* ./ || exit 1
-            rm -rf dist
-            echo "Files moved successfully"
-            ls -la
-            git add .
-            git commit -m "Deploy to public branch"
-            git push --force origin gh-pages
-          else
-            echo "Directory structure:"
-            ls -la
-            echo "Dist directory not found. Build may have failed."
-            exit 1
-          fi
+          echo "Current directory contents:"
+          ls -la
+          
+          echo "Building project..."
+          npm run build
+          
+          echo "Dist directory contents:"
+          ls -la dist
+          
+          echo "Deploying to gh-pages..."
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          
+          # Save dist folder
+          mv dist ../dist-temp
+          
+          # Create new orphan branch
+          git checkout --orphan gh-pages
+          git reset --hard
+          git clean -fd
+          
+          # Move dist contents back
+          mv ../dist-temp/* .
+          
+          # Add and commit
+          git add .
+          git commit -m "Deploy to public branch"
+          git push -f origin gh-pages
