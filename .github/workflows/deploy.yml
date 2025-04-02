@@ -38,31 +38,16 @@ jobs:
 
       - name: Deploy to public branch
         run: |
-          echo "Current directory contents:"
-          ls -la
-          
           echo "Building project..."
           npm run build
           
-          echo "Dist directory contents:"
-          ls -la dist
+          cd dist
+          touch .nojekyll
           
-          echo "Deploying to gh-pages..."
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           
-          # Save dist folder
-          mv dist ../dist-temp
-          
-          # Create new orphan branch
-          git checkout --orphan gh-pages
-          git reset --hard
-          git clean -fd
-          
-          # Move dist contents back
-          mv ../dist-temp/* .
-          
-          # Add and commit
-          git add .
-          git commit -m "Deploy to public branch"
-          git push -f origin gh-pages
+          git init
+          git add -A
+          git commit -m "Deploy to GitHub Pages"
+          git push -f origin HEAD:gh-pages
